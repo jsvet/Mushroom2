@@ -1,27 +1,57 @@
 var Game = {
 	stage : new createjs.Stage($("#stage")),
-	tileSrcs : ["img/small-mushroom.png", "img/small-dark-mushroom.png"],
+	tileSrcs : ["img/small-mushroom.png", 
+				"img/small-dark-mushroom.png",
+				"img/small-yellow-mushroom.png"],
 	tiles : [],
-	level : [1, 0, 0, 0, 0],
-	winState : [0, 0, 0, 0, 1],
+	level : [1, 1, 1, 0, 2, 2, 2],
+	winState : [2, 2, 2, 0, 1, 1, 1],
 	offsetX : 25,
 	offsetY : 25
 };
 
 Game.Tile = function(myX, myY, myType){
-	var my = new createjs.Bitmap(Game.tileSrcs[myType]);
+	'use strict';
+	var my = new createjs.Bitmap(Game.tileSrcs[myType]),
+	updateDirection = function(){
+		if(my.type === 1) {
+			my.direction = 1;
+		}
+		if(my.type === 2){
+			my.direction = -1;
+		}
+	},
+	jumpTo = function (destinationTile){
+		destinationTile.type = my.type;
+		my.type = 0;
+	};
 	my.type = myType;
 	my.posX = myX;
 	my.posY = myY;
+	updateDirection();
 	my.update = function(){
 		my.image.src = Game.tileSrcs[my.type];
+		updateDirection();
 	};
 	my.addEventListener("mousedown", function(){
-		var nextX;
-		if(my.type === 1){
-			my.type = 0;
-			nextX = my.posX + 1;
-			Game.tiles[nextX].type = 1;
+		var nextIndex, nextNextIndex, nextTile, nextNextTile, oppositeType;
+		if(my.type !== 0) {
+			if(my.type === 1){
+				oppositeType = 2;
+			} else {
+				oppositeType = 1;
+			}
+			nextIndex = my.posX + my.direction;
+			nextTile = Game.tiles[nextIndex];
+			
+			nextNextIndex = my.posX + (2* my.direction);
+			nextNextTile = Game.tiles[nextNextIndex];
+			
+			if (nextTile.type === 0){
+				jumpTo(nextTile);
+			} else if (nextTile.type === oppositeType && nextNextTile.type === 0){
+				jumpTo(nextNextTile);
+			}
 		}
 		Game.update();
 	});
