@@ -3,6 +3,7 @@ var Game = {
 	tileSrcs : ["img/small-mushroom.png", "img/small-dark-mushroom.png"],
 	tiles : [],
 	level : [1, 0, 0, 0, 0],
+	winState : [0, 0, 0, 0, 1],
 	offsetX : 25,
 	offsetY : 25
 };
@@ -12,7 +13,34 @@ Game.Tile = function(myX, myY, myType){
 	my.type = myType;
 	my.posX = myX;
 	my.posY = myY;
+	my.update = function(){
+		my.image.src = Game.tileSrcs[my.type];
+	};
+	my.addEventListener("mousedown", function(){
+		var nextX;
+		if(my.type === 1){
+			my.type = 0;
+			nextX = my.posX + 1;
+			Game.tiles[nextX].type = 1;
+		}
+		Game.update();
+	});
 	return my;
+};
+
+Game.isGameOver = function(){
+	var isWon = true, i;
+	for (i = 0; i < Game.tiles.length; i += 1) {
+		if (Game.tiles[i].type !== Game.winState[i]){
+			isWon = false;
+			break;
+		}
+	}
+	return isWon;
+};
+
+Game.gameOver = function(){
+	console.log("player wins");
 };
 
 Game.update = function(){
@@ -21,8 +49,12 @@ Game.update = function(){
 		tile = Game.tiles[i];
 		tile.x = tile.posX * tile.image.width + Game.offsetX;
 		tile.y = Game.offsetY;
+		tile.update();
 	}
 	Game.stage.update();
+	if(Game.isGameOver()){
+		Game.gameOver();
+	}
 };
 
 Game.initModel = function (){
@@ -39,3 +71,4 @@ Game.initModel = function (){
 };
 
 Game.initModel();
+
